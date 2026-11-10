@@ -1636,7 +1636,7 @@ function cycleQ(){S.q=(S.q+1)%3;if(S.q===0)_autoLow=false;_fn=0;_fa=0;_wi=0;appl
 applyQ();
 
 // ===== PWA: сохранение, установка, обновления =====
-const APP_V='1';
+const APP_V='2';
 window.exportSave=()=>{
   flush();
   let d='';try{d=localStorage.getItem('elb4')||''}catch(e){}
