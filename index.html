@@ -345,6 +345,13 @@ html.lo #mhead{animation:none}html.lo .grain,html.lo .emo,html.lo .rkstars.s2{di
 .rkrocket{position:absolute;left:50%;bottom:16px;width:84px;margin-left:-42px;will-change:transform}.rkrocket svg{display:block;width:100%;overflow:visible}
 .rkfl{transform-origin:45px 104px;animation:rkf .12s infinite alternate}@keyframes rkf{to{transform:scaleY(1.4)}}
 .rkboom{position:absolute;left:50%;top:42%;font-size:96px;transform:translate(-50%,-50%) scale(0);transition:transform .25s cubic-bezier(.2,2,.4,1)}.rkboom.on{transform:translate(-50%,-50%) scale(1)}
+
+.chb{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,370px);aspect-ratio:1;margin:8px auto;border:3px solid #ffd86b88;border-radius:8px;overflow:hidden;touch-action:manipulation}
+.chs{position:relative;display:flex;align-items:center;justify-content:center;background:#b58863}.chs.l{background:#f0d9b5}
+.chs.sel{background:#f6f669!important}.chs.lm{box-shadow:inset 0 0 0 3px #4aa3ff}.chs.ck{background:#ff6b6b!important}
+.chs i{position:absolute;width:30%;height:30%;border-radius:50%;background:#0006;pointer-events:none}
+.chp{font-size:clamp(22px,8.4vw,36px);line-height:1}.chp.w{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 1px 3px #000}.chp.k{color:#1a1a1a}
+.chop{display:flex;align-items:center;gap:10px;margin:6px 0}.chop .hd{width:54px;height:54px;flex:none}
 </style>
 </head>
 <body>
@@ -380,7 +387,7 @@ const $=id=>document.getElementById(id);
 const UA_LOW=/MiuiBrowser|XiaoMi|UCBrowser|Quark|HeyTapBrowser|VivoBrowser|HuaweiBrowser|Opera Mini/i.test(navigator.userAgent)||(navigator.hardwareConcurrency||8)<=4;
 let LOW=false,RQ=30,FI=16.7,_fc=0,_fn=0,_fa=0,_wi=0,_autoLow=UA_LOW,_tw=0,_tc=0;
 
-const S={coins:50,xp:0,food:80,en:90,fun:80,hyg:90,wc:20,clicks:0,inventory:[],equippedSkin:0,seenStage:0,fallCount:0,loc:0,locMask:1,mus:1,sfx:1,dirt:0,buffUntil:0,buffMul:1,pc:0,drunk:0,wcv:0,pee:100,ngam:0,nx10:0,crBet:0,crStep:0,crDiff:0,ncr5:0,ach:0,peak:0,nbuy:0,nvom:0,npoop:0,nwash:0,nsleep:0,nrev:0,q:0,upSh:0,upTo:0,upBd:0};
+const S={coins:50,xp:0,food:80,en:90,fun:80,hyg:90,wc:20,clicks:0,inventory:[],equippedSkin:0,seenStage:0,fallCount:0,loc:0,locMask:1,mus:1,sfx:1,dirt:0,buffUntil:0,buffMul:1,pc:0,drunk:0,wcv:0,pee:100,ngam:0,nx10:0,crBet:0,crStep:0,crDiff:0,ncr5:0,ach:0,peak:0,nbuy:0,nvom:0,npoop:0,nwash:0,nsleep:0,nrev:0,q:0,upSh:0,upTo:0,upBd:0,upv:0};
 try{const r=JSON.parse(localStorage.getItem('elb4')||'null');if(r&&typeof r==='object'){for(const k in S){if(k==='inventory'){if(Array.isArray(r.inventory))S.inventory=r.inventory.filter(i=>i&&i.count>0&&isFinite(i.food))}else if(typeof r[k]==='number'&&isFinite(r[k]))S[k]=r[k]}}}catch(e){}
 let saveT=0;const flush=()=>{saveT=0;if(window.noSave)return;try{localStorage.setItem('elb4',JSON.stringify(S))}catch(e){}};
 const save=()=>{if(!saveT)saveT=setTimeout(flush,800)};
@@ -1388,7 +1395,7 @@ function upCalc(){
 }
 function giveItem(d){const ex=S.inventory.find(i=>i.id===d.id);if(ex)ex.count++;else S.inventory.push({id:d.id,name:d.name,icon:d.icon,food:d.food,count:1})}
 window.openAzart=()=>{
-  $('box').innerHTML=`<h2>🎰 Азарт</h2><p style="font-size:12px;color:#ffd86bcc;margin-bottom:10px">Выбери игру и испытай удачу</p><div class="ggrid"><button class="gcard" onclick="openUpgrader()">${GAME_ART}<div class="gt">Апгрейдер</div></button><button class="gcard" onclick="openCrash()">${CRASH_ART}<div class="gt">Crash-локоть</div></button><button class="gcard" onclick="openRocket()">${ROCKET_ART}<div class="gt">Ракетка</div></button><div class="gcard soon"><div class="gsoon">🔒<br>Скоро</div></div></div><div class="closeBar"><button class="go sec" onclick="ovClose()">Закрыть</button></div>`;
+  $('box').innerHTML=`<h2>🎰 Азарт</h2><p style="font-size:12px;color:#ffd86bcc;margin-bottom:10px">Выбери игру и испытай удачу</p><div class="ggrid"><button class="gcard" onclick="openUpgrader()">${GAME_ART}<div class="gt">Апгрейдер</div></button><button class="gcard" onclick="openCrash()">${CRASH_ART}<div class="gt">Crash-локоть</div></button><button class="gcard" onclick="openRocket()">${ROCKET_ART}<div class="gt">Ракетка</div></button><button class="gcard" onclick="openChess()">${CHESS_ART}<div class="gt">Шахматы</div></button></div><div class="closeBar"><button class="go sec" onclick="ovClose()">Закрыть</button></div>`;
   ovShow();
 };
 window.openUpgrader=()=>{UP.bag=false;UP.res=null;renderUp();ovShow()};
@@ -1674,11 +1681,11 @@ function drawBin(x,y){
   g+=P2("M-62 -120L58 -134L62 -112L-60 -104Z",'#8a98a4','#111',4)+'<text x="0" y="-20" font-size="30" text-anchor="middle">♻️</text>';
   return g+'</g>';
 }
-function upSpd(k){return 1+.3*(S[k]|0)}
-const UPC=[800,2500,7000,18000,45000];
+function upSpd(k){return 1+.15*(S[k]|0)}
+const UPC=Array.from({length:15},(_,i)=>Math.round(500*Math.pow(300,i/14)/50)*50);
 window.openUpgrades=()=>{
   const U=[['upSh','🚿','Душ','моется быстрее'],['upTo',S.equippedSkin===7?'🗑️':'🚽',S.equippedSkin===7?'Мусорка':'Туалет','быстрее справляется'],['upBd','🛏️','Кровать','быстрее высыпается']];
-  $('box').innerHTML='<h2>🛠️ Улучшения</h2><p style="font-size:12px;color:#ffd86bcc;margin-bottom:10px">Вкладывай монеты — он будет делать всё быстрее</p>'+U.map(([k,ic,n,d])=>{const l=S[k]|0,mx=l>=UPC.length;return `<div class="skin-card" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px;text-align:left"><div style="font-size:32px">${ic}</div><div style="flex:1"><b>${n}</b> <small>ур. ${l}/${UPC.length}</small><div style="font-size:12px;opacity:.85">${d}: ×${upSpd(k).toFixed(1)}${mx?'':' → ×'+(upSpd(k)+.3).toFixed(1)}</div></div><button class="go ${mx||S.coins<UPC[l]?'dis':''}" onclick="buyUpg('${k}')">${mx?'МАКС':'⬆ '+UPC[l]+' 🪙'}</button></div>`}).join('')+'<div class="closeBar"><button class="go sec" onclick="ovClose()">Закрыть</button></div>';
+  $('box').innerHTML='<h2>🛠️ Улучшения</h2><p style="font-size:12px;color:#ffd86bcc;margin-bottom:10px">Вкладывай монеты — он будет делать всё быстрее</p>'+U.map(([k,ic,n,d])=>{const l=S[k]|0,mx=l>=UPC.length;return `<div class="skin-card" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px;text-align:left"><div style="font-size:32px">${ic}</div><div style="flex:1"><b>${n}</b> <small>ур. ${l}/${UPC.length}</small><div style="font-size:12px;opacity:.85">${d}: ×${upSpd(k).toFixed(2)}${mx?'':' → ×'+(upSpd(k)+.15).toFixed(2)}</div></div><button class="go ${mx||S.coins<UPC[l]?'dis':''}" onclick="buyUpg('${k}')">${mx?'МАКС':'⬆ '+UPC[l]+' 🪙'}</button></div>`}).join('')+'<div class="closeBar"><button class="go sec" onclick="ovClose()">Закрыть</button></div>';
   ovShow();
 };
 window.buyUpg=k=>{const l=S[k]|0;if(l>=UPC.length)return;if(S.coins<UPC[l]){SFX.err();return toast('Не хватает монет!')}S.coins-=UPC[l];S[k]=l+1;hud();save();SFX.buy();openUpgrades()};
@@ -1737,7 +1744,7 @@ function rkBoom(){
 function engSkinFx(){}
 
 // ===== PWA: сохранение, установка, обновления =====
-const APP_V='3';
+const APP_V='4';
 window.exportSave=()=>{
   flush();
   let d='';try{d=localStorage.getItem('elb4')||''}catch(e){}
@@ -1768,21 +1775,151 @@ if('serviceWorker' in navigator){
 }
 let _vc=0;
 async function checkUpdate(){
-  if(Date.now()-_vc<60000)return;_vc=Date.now();
+  if(Date.now()-_vc<30000)return;_vc=Date.now();
   try{
     const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});
     const j=await r.json();
-    if(j&&j.v&&String(j.v)!==APP_V&&!$('updbar')){
-      const b=document.createElement('button');b.id='updbar';
-      b.textContent='🔄 Вышло обновление — нажми, чтобы обновить';
-      b.style.cssText='position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9999;background:#ffd86b;color:#4a2c00;border:2px solid #fff;border-radius:16px;padding:10px 16px;font-weight:800;font-size:14px;box-shadow:0 4px 18px #000a;max-width:92%';
-      b.onclick=()=>{flush();window.noSave=true;location.reload()};
-      document.body.appendChild(b);
+    if(j&&j.v&&String(j.v)!==APP_V&&!$('updov')){
+      const o=document.createElement('div');o.id='updov';
+      o.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(6,1,16,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffd86b;font-weight:800;text-align:center';
+      o.innerHTML='<div style="width:58px;height:58px;border:6px solid #ffffff33;border-top-color:#ffd86b;border-radius:50%;animation:spin .8s linear infinite"></div><div style="margin-top:20px;font-size:21px">Загрузка обновления…</div><div style="font-size:13px;opacity:.7;margin-top:6px;font-weight:600">Прогресс сохранён</div>';
+      document.body.appendChild(o);flush();
+      setTimeout(()=>{window.noSave=true;location.reload()},1800);
     }
   }catch(e){}
 }
+setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 addEventListener('load',()=>setTimeout(checkUpdate,4000));
+
+// ===== Шахматы =====
+if((S.upv|0)<2){S.upSh=S.upTo=S.upBd=0;S.upv=2;save()}
+const CH_G=['','♟\uFE0E','♞\uFE0E','♝\uFE0E','♜\uFE0E','♛\uFE0E','♚\uFE0E'],CH_V=[0,100,320,330,500,900,0];
+const CH_ND=[[-1,-2],[1,-2],[-2,-1],[2,-1],[-2,1],[2,1],[-1,2],[1,2]],CH_KD=[[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+const CHD=[{n:'Лёгкий',o:'Локоть',sk:0,m:1.6,d:1,rnd:.55,ms:200},{n:'Средний',o:'Алкаш',sk:4,m:2,d:2,rnd:.15,ms:500},{n:'Сложный',o:'Наркоман',sk:5,m:2.6,d:4,rnd:0,ms:1400},{n:'Хардкор',o:'Инженер',sk:7,m:3.5,d:9,rnd:0,ms:3000}];
+function chNew(){const b=new Array(64).fill(0),k=[4,2,3,5,6,3,2,4];for(let f=0;f<8;f++){b[f]=-k[f];b[8+f]=-1;b[48+f]=1;b[56+f]=k[f]}return{b,t:1,c:15,ep:-1,n:0}}
+function chAtt(b,sq,by){
+  const f=sq&7,r=sq>>3,pr=r+(by===1?1:-1);
+  if(pr>=0&&pr<8)for(const df of[-1,1]){const x=f+df;if(x>=0&&x<8&&b[pr*8+x]===by)return true}
+  for(const[df,dr]of CH_ND){const x=f+df,y=r+dr;if(x>=0&&x<8&&y>=0&&y<8&&b[y*8+x]===2*by)return true}
+  for(const[df,dr]of CH_KD){let x=f+df,y=r+dr,st=1;while(x>=0&&x<8&&y>=0&&y<8){const q=b[y*8+x];if(q){if(q*by>0){const a=q*by;if(a===5||(a===6&&st===1)||(a===4&&(df===0||dr===0))||(a===3&&df!==0&&dr!==0))return true}break}x+=df;y+=dr;st++}}
+  return false;
+}
+function chGen(s,caps){
+  const b=s.b,t=s.t,out=[];
+  for(let i=0;i<64;i++){const p=b[i];if(!p||p*t<0)continue;const a=p*t,f=i&7,r=i>>3;
+    if(a===1){const r1=r-t;if(r1<0||r1>7)continue;const pm=(r1===0||r1===7)?5:0;
+      if(!b[r1*8+f]){if(!caps||pm){out.push([i,r1*8+f,pm,0]);if(!caps&&(t===1?r===6:r===1)&&!b[(r-2*t)*8+f])out.push([i,(r-2*t)*8+f,0,0])}}
+      for(const df of[-1,1]){const x=f+df;if(x<0||x>7)continue;const to=r1*8+x,q=b[to];if(q*t<0)out.push([i,to,pm,0]);else if(to===s.ep&&!q)out.push([i,to,0,1])}
+    }else if(a===2||a===6){for(const[df,dr]of(a===2?CH_ND:CH_KD)){const x=f+df,y=r+dr;if(x<0||x>7||y<0||y>7)continue;const to=y*8+x,q=b[to];if(q*t>0||(caps&&!q))continue;out.push([i,to,0,0])}
+      if(a===6&&!caps){const o=-t;
+        if(t===1&&i===60){if((s.c&1)&&!b[61]&&!b[62]&&b[63]===4&&!chAtt(b,60,o)&&!chAtt(b,61,o)&&!chAtt(b,62,o))out.push([60,62,0,2]);if((s.c&2)&&!b[59]&&!b[58]&&!b[57]&&b[56]===4&&!chAtt(b,60,o)&&!chAtt(b,59,o)&&!chAtt(b,58,o))out.push([60,58,0,2])}
+        if(t===-1&&i===4){if((s.c&4)&&!b[5]&&!b[6]&&b[7]===-4&&!chAtt(b,4,o)&&!chAtt(b,5,o)&&!chAtt(b,6,o))out.push([4,6,0,2]);if((s.c&8)&&!b[3]&&!b[2]&&!b[1]&&b[0]===-4&&!chAtt(b,4,o)&&!chAtt(b,3,o)&&!chAtt(b,2,o))out.push([4,2,0,2])}}
+    }else{for(const[df,dr]of CH_KD){if(a===3&&(df===0||dr===0))continue;if(a===4&&df!==0&&dr!==0)continue;let x=f+df,y=r+dr;while(x>=0&&x<8&&y>=0&&y<8){const to=y*8+x,q=b[to];if(q*t>0)break;if(q||!caps)out.push([i,to,0,0]);if(q)break;x+=df;y+=dr}}}
+  }
+  return out;
+}
+function chMake(s,m){
+  const b=s.b.slice(),from=m[0],to=m[1],p=b[from],ap=Math.abs(p);let c=s.c,ep=-1;
+  b[to]=m[2]?m[2]*(p>0?1:-1):p;b[from]=0;
+  if(m[3]===1)b[to+(s.t===1?8:-8)]=0;
+  if(m[3]===2){if(to===62){b[63]=0;b[61]=4}else if(to===58){b[56]=0;b[59]=4}else if(to===6){b[7]=0;b[5]=-4}else{b[0]=0;b[3]=-4}}
+  if(ap===1&&Math.abs(to-from)===16)ep=(from+to)/2;
+  if(ap===6)c&=s.t===1?12:3;
+  if(from===63||to===63)c&=14;if(from===56||to===56)c&=13;if(from===7||to===7)c&=11;if(from===0||to===0)c&=7;
+  return{b,t:-s.t,c,ep,n:s.n+(s.t===-1?1:0)};
+}
+function chKing(b,t){for(let i=0;i<64;i++)if(b[i]===6*t)return i;return -1}
+function chLegal(s){return chGen(s,false).filter(m=>{const n=chMake(s,m);return !chAtt(n.b,chKing(n.b,s.t),-s.t)})}
+function chEval(s){
+  const b=s.b;let v=0,mat=0;
+  for(let i=0;i<64;i++){const p=b[i];if(p)mat+=CH_V[Math.abs(p)]}
+  for(let i=0;i<64;i++){const p=b[i];if(!p)continue;const a=Math.abs(p),sg=p>0?1:-1,f=i&7,r=i>>3,cen=7-Math.abs(2*f-7)/2-Math.abs(2*r-7)/2-0;
+    let x=CH_V[a];
+    if(a===1)x+=cen*3+(sg===1?6-r:r-1)*7;else if(a===2)x+=cen*9;else if(a===3||a===5)x+=cen*4;else if(a===6)x+=mat<2600?cen*7:-cen*5+((sg===1?r:7-r)===7&&(f<3||f>5)?25:0);
+    v+=sg*x}
+  return v*s.t;
+}
+let CH_N=0,CH_DL=0,CH_AB=false;
+function chOrder(s,ms){const b=s.b;return ms.map(m=>[m,(b[m[1]]?10*CH_V[Math.abs(b[m[1]])]-CH_V[Math.abs(b[m[0]])]/10+1000:0)+(m[2]?800:0)]).sort((x,y)=>y[1]-x[1]).map(x=>x[0])}
+function chQ(s,al,be,pl){
+  if((++CH_N&511)===0&&Date.now()>CH_DL)CH_AB=true;if(CH_AB)return 0;
+  const st=chEval(s);if(st>=be)return st;if(st>al)al=st;if(pl>7)return st;
+  for(const m of chOrder(s,chGen(s,true))){const n=chMake(s,m);if(chAtt(n.b,chKing(n.b,s.t),-s.t))continue;const v=-chQ(n,-be,-al,pl+1);if(CH_AB)return 0;if(v>=be)return v;if(v>al)al=v}
+  return al;
+}
+function chSrch(s,d,al,be,pl){
+  if((++CH_N&511)===0&&Date.now()>CH_DL)CH_AB=true;if(CH_AB)return 0;
+  const inC=chAtt(s.b,chKing(s.b,s.t),-s.t);if(inC)d++;
+  if(d<=0)return chQ(s,al,be,pl);
+  let any=false;
+  for(const m of chOrder(s,chGen(s,false))){const n=chMake(s,m);if(chAtt(n.b,chKing(n.b,s.t),-s.t))continue;any=true;const v=-chSrch(n,d-1,-be,-al,pl+1);if(CH_AB)return 0;if(v>=be)return v;if(v>al)al=v}
+  if(!any)return inC?-30000+pl:0;
+  return al;
+}
+function chBot(s,D){
+  const ms=chLegal(s);if(!ms.length)return null;
+  if(Math.random()<D.rnd)return ms[Math.floor(Math.random()*ms.length)];
+  CH_DL=Date.now()+D.ms;CH_AB=false;CH_N=0;let best=ms[0],ord=chOrder(s,ms);
+  for(let d=1;d<=D.d;d++){
+    let bm=null,al=-1e9;
+    for(const m of ord){const v=-chSrch(chMake(s,m),d-1,-1e9,-al,1);if(CH_AB)break;if(v>al){al=v;bm=m}}
+    if(CH_AB||!bm)break;best=bm;ord=[bm].concat(ord.filter(x=>x!==bm));if(al>29000)break;
+  }
+  return best;
+}
+const CH={bet:100,diff:1,st:'idle',s:null,sel:-1,lg:[],last:null,res:null,busy:false,msg:''};
+const CHESS_ART=`<svg viewBox="0 0 300 375" preserveAspectRatio="xMidYMid slice"><defs><pattern id="chp" width="75" height="75" patternUnits="userSpaceOnUse"><rect width="75" height="75" fill="#f0d9b5"/><rect width="37.5" height="37.5" fill="#b58863"/><rect x="37.5" y="37.5" width="37.5" height="37.5" fill="#b58863"/></pattern></defs><rect width="300" height="375" fill="url(#chp)"/><rect width="300" height="375" fill="#10052a" opacity=".45"/><text x="150" y="250" font-size="190" text-anchor="middle" fill="#fff" stroke="#111" stroke-width="5">♞\uFE0E</text></svg>`;
+function chEnd(){
+  const s=CH.s,ms=chLegal(s),inC=chAtt(s.b,chKing(s.b,s.t),-s.t);let r=null;
+  const left=s.b.filter(p=>p&&Math.abs(p)!==6).length;
+  if(!ms.length)r=inC?(s.t===1?'lose':'win'):'draw';else if(left===0||s.n>=90)r='draw';
+  if(!r){CH.msg=inC?'Шах!':'';return false}
+  CH.st='over';const D=CHD[CH.diff];
+  if(r==='win'){const pay=Math.floor(CH.bet*D.m);S.coins+=pay;CH.res={k:'w',t:`🎉 Мат! Ты победил +${pay} 🪙`};SFX.buy()}
+  else if(r==='draw'){S.coins+=CH.bet;CH.res={k:'w',t:'🤝 Ничья — ставка возвращена'}}
+  else{CH.res={k:'l',t:`💥 Тебе поставили мат. −${CH.bet} 🪙`};SFX.fall()}
+  hud();save();return true;
+}
+function chRender(){
+  const D=CHD[CH.diff];let h=`<div class="upg"><div class="uhead"><button class="go sec" onclick="chLeave()">← Азарт</button><div class="ubal">🪙 ${Math.floor(S.coins)}</div></div>`;
+  if(CH.st==='idle'){
+    const ok=CH.bet>=10&&CH.bet<=S.coins;
+    h+=`<div class="chop"><div class="hd">${getSkinHead(D.sk)}</div><div><b>Против: ${D.o}</b><div style="font-size:12px;opacity:.8">Победа ×${D.m} · ничья = возврат</div></div></div><div class="useg crdiff">${CHD.map((x,i)=>`<button class="${CH.diff===i?'on':''}" onclick="chDiff(${i})">${x.n}</button>`).join('')}</div><div class="uchips">${[100,500,1000,5000].map(v=>`<button class="uc ${CH.bet===v?'on':''}" onclick="chAmt(${v})">${v}</button>`).join('')}<button class="uc" onclick="chAmt(Math.floor(S.coins))">ВСЁ</button></div><button class="ugo ${ok?'':'dis'}" onclick="chStart()">♟ НАЧАТЬ<small>ставка ${CH.bet} 🪙</small></button></div>`;
+    $('box').innerHTML=h;ovShow();return;
+  }
+  const s=CH.s,ck=chAtt(s.b,chKing(s.b,s.t),-s.t)?chKing(s.b,s.t):-1;
+  h+=`<div class="chop"><div class="hd">${getSkinHead(D.sk)}</div><div><b>${D.o}</b> · ${D.n}<div style="font-size:12px;opacity:.85">${CH.st==='over'?'Партия окончена':CH.busy?'🤔 Думает…':(CH.msg||'Твой ход (белые)')}</div></div></div><div class="chb">`;
+  for(let i=0;i<64;i++){const p=s.b[i],cl=['chs',((i>>3)+(i&7))%2?'':'l',CH.sel===i?'sel':'',CH.last&&(CH.last[0]===i||CH.last[1]===i)?'lm':'',ck===i?'ck':''].join(' ');
+    h+=`<div class="${cl}" onclick="chTap(${i})">${p?`<span class="chp ${p>0?'w':'k'}">${CH_G[Math.abs(p)]}</span>`:''}${CH.lg.some(m=>m[1]===i)?'<i></i>':''}</div>`}
+  h+='</div>';
+  h+=CH.st==='over'?`<div class="crres ${CH.res.k}">${CH.res.t}</div><button class="ugo" onclick="chAgain()">🔁 ЕЩЁ ПАРТИЮ</button>`:`<button class="go sec" onclick="chResign()">🏳️ Сдаться</button>`;
+  $('box').innerHTML=h+'</div>';ovShow();
+}
+window.openChess=()=>{if(CH.st!=='idle'){CH.st='idle'}chRender()};
+window.chDiff=i=>{CH.diff=i;chRender()};window.chAmt=v=>{CH.bet=Math.max(10,Math.floor(v));chRender()};
+window.chAgain=()=>{CH.st='idle';chRender()};
+window.chLeave=()=>{if(CH.st==='play'){CH.st='over';CH.res={k:'l'}}CH.st='idle';CH.busy=false;openAzart()};
+window.chResign=()=>{if(CH.st!=='play'||CH.busy)return;CH.st='over';CH.res={k:'l',t:`🏳️ Ты сдался. −${CH.bet} 🪙`};save();chRender()};
+window.chStart=()=>{
+  if(CH.bet<10){SFX.err();return toast('Минимальная ставка 10 🪙')}
+  if(CH.bet>S.coins){SFX.err();return toast('Не хватает монет!')}
+  S.coins-=CH.bet;S.ngam=(S.ngam||0)+1;hud();save();SFX.up();
+  CH.s=chNew();CH.st='play';CH.sel=-1;CH.lg=[];CH.last=null;CH.res=null;CH.busy=false;CH.msg='';chRender();
+};
+window.chTap=i=>{
+  if(CH.st!=='play'||CH.busy)return;const s=CH.s;
+  const mv=CH.lg.find(m=>m[1]===i);
+  if(CH.sel>=0&&mv){CH.s=chMake(s,mv);CH.last=mv;CH.sel=-1;CH.lg=[];SFX.buy();if(chEnd()){chRender();return}CH.busy=true;chRender();setTimeout(chBotMove,60);return}
+  if(s.b[i]>0){CH.sel=i;CH.lg=chLegal(s).filter(m=>m[0]===i)}else{CH.sel=-1;CH.lg=[]}
+  chRender();
+};
+function chBotMove(){
+  if(CH.st!=='play')return;
+  const m=chBot(CH.s,CHD[CH.diff]);CH.busy=false;
+  if(m){CH.s=chMake(CH.s,m);CH.last=m;tone(300,.08,'square',.05)}
+  chEnd();chRender();
+}
 </script>
 </body>
 </html>
