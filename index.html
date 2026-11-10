@@ -346,11 +346,28 @@ html.lo #mhead{animation:none}html.lo .grain,html.lo .emo,html.lo .rkstars.s2{di
 .rkfl{transform-origin:45px 104px;animation:rkf .12s infinite alternate}@keyframes rkf{to{transform:scaleY(1.4)}}
 .rkboom{position:absolute;left:50%;top:42%;font-size:96px;transform:translate(-50%,-50%) scale(0);transition:transform .25s cubic-bezier(.2,2,.4,1)}.rkboom.on{transform:translate(-50%,-50%) scale(1)}
 
-.chb{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,370px);aspect-ratio:1;margin:8px auto;border:3px solid #ffd86b88;border-radius:8px;overflow:hidden;touch-action:manipulation}
-.chs{position:relative;display:flex;align-items:center;justify-content:center;background:#b58863}.chs.l{background:#f0d9b5}
-.chs.sel{background:#f6f669!important}.chs.lm{box-shadow:inset 0 0 0 3px #4aa3ff}.chs.ck{background:#ff6b6b!important}
-.chs i{position:absolute;width:30%;height:30%;border-radius:50%;background:#0006;pointer-events:none}
-.chp{font-size:clamp(22px,8.4vw,36px);line-height:1}.chp.w{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 1px 3px #000}.chp.k{color:#1a1a1a}
+/* ===== ШАХМАТЫ ===== */
+.chwrap{--cs:min(364px,calc(100vw - 56px));width:calc(var(--cs) + 22px);margin:8px auto 4px;padding:8px;border-radius:16px;background:linear-gradient(145deg,#ffe58f,#c58a1c 45%,#7a4d0a);box-shadow:0 0 0 2px #3b2305,0 10px 26px #000a,0 0 28px #ffd86b44;position:relative;contain:layout paint;flex:none}
+.chb{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:var(--cs);height:var(--cs);border-radius:6px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;box-shadow:inset 0 0 0 2px #0006}
+.chs{position:relative;display:block;width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;background:linear-gradient(145deg,#6a3fb8,#4b2790);cursor:pointer}
+.chs.l{background:linear-gradient(145deg,#f6e7c8,#dcc294)}
+.chs.lm::before{content:"";position:absolute;inset:0;background:#ffd86b;opacity:.38;pointer-events:none}
+.chs.sel::before{content:"";position:absolute;inset:0;background:#5cf0a0;opacity:.55;pointer-events:none}
+.chs.ck::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,#ff2d2d 0,#ff2d2dcc 35%,transparent 80%);pointer-events:none;animation:chck .9s ease-in-out infinite alternate}
+@keyframes chck{to{opacity:.45}}
+.chs .dot{position:absolute;left:50%;top:50%;width:30%;height:30%;margin:-15% 0 0 -15%;border-radius:50%;background:#1fd25fcc;box-shadow:0 0 8px #1fd25f;pointer-events:none}
+.chs .cap{position:absolute;inset:6%;border-radius:50%;border:3px solid #ff4d6dcc;box-shadow:0 0 10px #ff4d6d;pointer-events:none}
+.chs .co{position:absolute;font:700 9px/1 system-ui,sans-serif;pointer-events:none;opacity:.75}
+.chs .co.r{left:3px;top:3px}.chs .co.f{right:3px;bottom:2px}
+.chs.l .co{color:#4b2790}.chs:not(.l) .co{color:#f6e7c8}
+.chs svg.pc{position:absolute;left:6%;top:4%;width:88%;height:88%;pointer-events:none;overflow:visible;filter:drop-shadow(0 2px 2px #0008)}
+.chs svg.pc.pop{animation:chpop .22s cubic-bezier(.2,1.8,.4,1)}
+@keyframes chpop{from{transform:scale(.6)}to{transform:scale(1)}}
+.chinfo{display:flex;align-items:center;gap:10px;margin:6px 0;height:58px;overflow:hidden}.chinfo .hd{width:54px;height:54px;flex:none}
+.chinfo>div{min-width:0;flex:1;text-align:left}.chinfo b,.chinfo .st{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chinfo .st{font-size:12px;opacity:.9;height:16px;line-height:16px}
+.chfoot{height:96px;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;margin-top:6px}
+.chfoot .crres{margin:0;padding:10px}.chfoot .ugo{margin-top:0}.chfoot .go{width:100%}
 .chop{display:flex;align-items:center;gap:10px;margin:6px 0}.chop .hd{width:54px;height:54px;flex:none}
 </style>
 </head>
@@ -1744,7 +1761,7 @@ function rkBoom(){
 function engSkinFx(){}
 
 // ===== PWA: сохранение, установка, обновления =====
-const APP_V='4';
+const APP_V='5';
 window.exportSave=()=>{
   flush();
   let d='';try{d=localStorage.getItem('elb4')||''}catch(e){}
@@ -1881,20 +1898,58 @@ function chEnd(){
   else{CH.res={k:'l',t:`💥 Тебе поставили мат. −${CH.bet} 🪙`};SFX.fall()}
   hud();save();return true;
 }
+const CH_SVG=(()=>{
+  const P={
+    1:'<path d="M22.5 9a5.5 5.5 0 0 0-3.6 9.6c-3 1.9-5 5.2-5 9 0 3 1.3 5.4 3.3 7H13v4h19v-4h-4.2c2-1.6 3.3-4 3.3-7 0-3.8-2-7.1-5-9A5.5 5.5 0 0 0 22.5 9z"/>',
+    2:'<path d="M14 38v-3c0-2 1-3.4 2.4-4.8C13 28 12 24 14 19c1.5-4 5-7 8-9l-1-4 4 2.5c6 1 10 6 10.5 14L33 38z"/><circle cx="19.5" cy="16.5" r="1.3" class="eye"/>',
+    3:'<path d="M12 38v-3c2-1.5 4-3 4-6 0-3-3-5-3-9 0-4 4-7 8-9.5V8h2v2.5c4 2.5 8 5.5 8 9.5 0 4-3 6-3 9 0 3 2 4.5 4 6v3z"/><path d="M19 17l7 7" class="ln"/>',
+    4:'<path d="M12 38v-4l3-3V19l-3-3V9h5v3h3.5V9h4.5v3H28V9h5v7l-3 3v12l3 3v4z"/>',
+    5:'<path d="M11 38l-2-22 7 8 3-13 3.5 13 3.5-13 3 13 7-8-2 22z"/><circle cx="9" cy="14" r="2.2"/><circle cx="36" cy="14" r="2.2"/><circle cx="22.5" cy="9" r="2.4"/>',
+    6:'<path d="M20.5 5h4v3H28v4h-3.5v3.5c6 1.5 10 6 10 12 0 4-2 7-4 9.5H15c-2-2.5-4-5.5-4-9.5 0-6 4-10.5 10-12V12H17.5V8h3z"/>'
+  };
+  const base='<path d="M10 41h25v-3H10z"/>';
+  const out={};
+  for(const k in P){
+    for(const side of ['w','k']){
+      const id=side+k;
+      const f=side==='w'?['#fffdf4','#e9d9a8','#7a5a12']:['#5b4a86','#1b0f3a','#c9a6ff'];
+      const ex=side==='w'?'#6a4a00':'#e9d9ff';
+      out[id]=`<svg class="pc" viewBox="0 0 45 45"><defs><linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${f[0]}"/><stop offset="1" stop-color="${f[1]}"/></linearGradient></defs><g fill="url(#g${id})" stroke="${f[2]}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">${base}${P[k]}</g><g fill="${ex}" stroke="${ex}">${k==2?'<circle cx="19.5" cy="16.5" r="1.3" stroke="none"/>':''}${k==3?'<path d="M19 17l7 7" fill="none" stroke-width="1.4" stroke-linecap="round"/>':''}</g></svg>`.replace(/<circle cx="19.5" cy="16.5" r="1.3" class="eye"\/>/,'').replace(/<path d="M19 17l7 7" class="ln"\/>/,'');
+    }
+  }
+  return out;
+})();
+function chPiece(p,pop){const k=(p>0?'w':'k')+Math.abs(p);return CH_SVG[k].replace('class="pc"','class="pc'+(pop?' pop':'')+'"')}
+function chBoardHTML(){
+  const s=CH.s,ck=chAtt(s.b,chKing(s.b,s.t),-s.t)?chKing(s.b,s.t):-1;let h='';
+  for(let i=0;i<64;i++){
+    const p=s.b[i],r=i>>3,c=i&7,mv=CH.lg.some(m=>m[1]===i);
+    const cl=['chs',(r+c)%2?'':'l',CH.sel===i?'sel':'',CH.last&&(CH.last[0]===i||CH.last[1]===i)?'lm':'',ck===i?'ck':''].filter(Boolean).join(' ');
+    const pop=!!(CH.last&&CH.last[1]===i&&p);
+    h+=`<div class="${cl}" data-i="${i}">${c===0?`<span class="co r">${8-r}</span>`:''}${r===7?`<span class="co f">${'abcdefgh'[c]}</span>`:''}${p?chPiece(p,pop):''}${mv?(p?'<span class="cap"></span>':'<span class="dot"></span>'):''}</div>`;
+  }
+  return h;
+}
+function chStatus(){return CH.st==='over'?'Партия окончена':CH.busy?'🤔 Думает…':(CH.msg||'Твой ход (белые)')}
+function chFoot(){return CH.st==='over'?`<div class="crres ${CH.res.k}">${CH.res.t}</div><button class="ugo" onclick="chAgain()">🔁 ЕЩЁ ПАРТИЮ</button>`:`<button class="go sec" onclick="chResign()">🏳️ Сдаться</button>`}
 function chRender(){
-  const D=CHD[CH.diff];let h=`<div class="upg"><div class="uhead"><button class="go sec" onclick="chLeave()">← Азарт</button><div class="ubal">🪙 ${Math.floor(S.coins)}</div></div>`;
+  const D=CHD[CH.diff];
   if(CH.st==='idle'){
+    let h=`<div class="upg"><div class="uhead"><button class="go sec" onclick="chLeave()">← Азарт</button><div class="ubal">🪙 ${Math.floor(S.coins)}</div></div>`;
     const ok=CH.bet>=10&&CH.bet<=S.coins;
     h+=`<div class="chop"><div class="hd">${getSkinHead(D.sk)}</div><div><b>Против: ${D.o}</b><div style="font-size:12px;opacity:.8">Победа ×${D.m} · ничья = возврат</div></div></div><div class="useg crdiff">${CHD.map((x,i)=>`<button class="${CH.diff===i?'on':''}" onclick="chDiff(${i})">${x.n}</button>`).join('')}</div><div class="uchips">${[100,500,1000,5000].map(v=>`<button class="uc ${CH.bet===v?'on':''}" onclick="chAmt(${v})">${v}</button>`).join('')}<button class="uc" onclick="chAmt(Math.floor(S.coins))">ВСЁ</button></div><button class="ugo ${ok?'':'dis'}" onclick="chStart()">♟ НАЧАТЬ<small>ставка ${CH.bet} 🪙</small></button></div>`;
     $('box').innerHTML=h;ovShow();return;
   }
-  const s=CH.s,ck=chAtt(s.b,chKing(s.b,s.t),-s.t)?chKing(s.b,s.t):-1;
-  h+=`<div class="chop"><div class="hd">${getSkinHead(D.sk)}</div><div><b>${D.o}</b> · ${D.n}<div style="font-size:12px;opacity:.85">${CH.st==='over'?'Партия окончена':CH.busy?'🤔 Думает…':(CH.msg||'Твой ход (белые)')}</div></div></div><div class="chb">`;
-  for(let i=0;i<64;i++){const p=s.b[i],cl=['chs',((i>>3)+(i&7))%2?'':'l',CH.sel===i?'sel':'',CH.last&&(CH.last[0]===i||CH.last[1]===i)?'lm':'',ck===i?'ck':''].join(' ');
-    h+=`<div class="${cl}" onclick="chTap(${i})">${p?`<span class="chp ${p>0?'w':'k'}">${CH_G[Math.abs(p)]}</span>`:''}${CH.lg.some(m=>m[1]===i)?'<i></i>':''}</div>`}
-  h+='</div>';
-  h+=CH.st==='over'?`<div class="crres ${CH.res.k}">${CH.res.t}</div><button class="ugo" onclick="chAgain()">🔁 ЕЩЁ ПАРТИЮ</button>`:`<button class="go sec" onclick="chResign()">🏳️ Сдаться</button>`;
-  $('box').innerHTML=h+'</div>';ovShow();
+  // каркас партии строится один раз, дальше обновляются только доска, статус и низ
+  if(!document.getElementById('chb')){
+    $('box').innerHTML=`<div class="upg"><div class="uhead"><button class="go sec" onclick="chLeave()">← Азарт</button><div class="ubal" id="chbal"></div></div><div class="chinfo"><div class="hd">${getSkinHead(D.sk)}</div><div><b>${D.o} · ${D.n}</b><span class="st" id="chst"></span></div></div><div class="chwrap"><div class="chb" id="chb"></div></div><div class="chfoot" id="chfoot"></div></div>`;
+    document.getElementById('chb').addEventListener('click',e=>{const c=e.target.closest('.chs');if(c)chTap(+c.dataset.i)});
+  }
+  document.getElementById('chb').innerHTML=chBoardHTML();
+  document.getElementById('chst').textContent=chStatus();
+  document.getElementById('chfoot').innerHTML=chFoot();
+  document.getElementById('chbal').textContent='🪙 '+Math.floor(S.coins);
+  ovShow();
 }
 window.openChess=()=>{if(CH.st!=='idle'){CH.st='idle'}chRender()};
 window.chDiff=i=>{CH.diff=i;chRender()};window.chAmt=v=>{CH.bet=Math.max(10,Math.floor(v));chRender()};
@@ -1910,7 +1965,7 @@ window.chStart=()=>{
 window.chTap=i=>{
   if(CH.st!=='play'||CH.busy)return;const s=CH.s;
   const mv=CH.lg.find(m=>m[1]===i);
-  if(CH.sel>=0&&mv){CH.s=chMake(s,mv);CH.last=mv;CH.sel=-1;CH.lg=[];SFX.buy();if(chEnd()){chRender();return}CH.busy=true;chRender();setTimeout(chBotMove,60);return}
+  if(CH.sel>=0&&mv){CH.s=chMake(s,mv);CH.last=mv;CH.sel=-1;CH.lg=[];SFX.buy();if(chEnd()){chRender();return}CH.busy=true;chRender();requestAnimationFrame(()=>setTimeout(chBotMove,120));return}
   if(s.b[i]>0){CH.sel=i;CH.lg=chLegal(s).filter(m=>m[0]===i)}else{CH.sel=-1;CH.lg=[]}
   chRender();
 };
