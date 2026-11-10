@@ -1770,7 +1770,7 @@ function rkBoom(){
 function engSkinFx(){}
 
 // ===== PWA: сохранение, установка, обновления =====
-const APP_V='6';
+const APP_V='7';
 window.exportSave=()=>{
   flush();
   let d='';try{d=localStorage.getItem('elb4')||''}catch(e){}
@@ -1822,7 +1822,7 @@ addEventListener('load',()=>setTimeout(checkUpdate,4000));
 if((S.upv|0)<2){S.upSh=S.upTo=S.upBd=0;S.upv=2;save()}
 const CH_G=['','♟\uFE0E','♞\uFE0E','♝\uFE0E','♜\uFE0E','♛\uFE0E','♚\uFE0E'],CH_V=[0,100,320,330,500,900,0];
 const CH_ND=[[-1,-2],[1,-2],[-2,-1],[2,-1],[-2,1],[2,1],[-1,2],[1,2]],CH_KD=[[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
-const CHD=[{n:'Лёгкий',o:'Локоть',sk:0,m:1.6,d:1,rnd:.55,ms:200},{n:'Средний',o:'Алкаш',sk:4,m:2,d:2,rnd:.15,ms:500},{n:'Сложный',o:'Наркоман',sk:5,m:2.6,d:4,rnd:0,ms:1400},{n:'Хардкор',o:'Инженер',sk:7,m:3.5,d:9,rnd:0,ms:3000}];
+const CHD=[{n:'Лёгкий',o:'Локоть',sk:0,m:1.6,hint:{ar:1,hl:1,cp:1,dt:1,tx:1},d:1,nz:260,noq:true,rnd:.35,ms:400},{n:'Средний',o:'Алкаш',sk:4,m:2,hint:{ar:1,hl:1,cp:0,dt:1,tx:1},d:2,nz:110,noq:true,rnd:.06,ms:800},{n:'Сложный',o:'Наркоман',sk:5,m:2.6,hint:{ar:0,hl:1,cp:0,dt:1,tx:1},d:3,nz:20,noq:false,rnd:0,ms:1500},{n:'Хардкор',o:'Инженер',sk:7,m:3.5,hint:{ar:0,hl:0,cp:0,dt:0,tx:0},d:9,nz:0,noq:false,rnd:0,ms:3000}];
 function chNew(){const b=new Array(64).fill(0),k=[4,2,3,5,6,3,2,4];for(let f=0;f<8;f++){b[f]=-k[f];b[8+f]=-1;b[48+f]=1;b[56+f]=k[f]}return{b,t:1,c:15,ep:-1,n:0}}
 function chAtt(b,sq,by){
   const f=sq&7,r=sq>>3,pr=r+(by===1?1:-1);
@@ -1866,7 +1866,7 @@ function chEval(s){
     v+=sg*x}
   return v*s.t;
 }
-let CH_N=0,CH_DL=0,CH_AB=false;
+let CH_N=0,CH_DL=0,CH_AB=false,CH_NOQ=false;
 function chOrder(s,ms){const b=s.b;return ms.map(m=>[m,(b[m[1]]?10*CH_V[Math.abs(b[m[1]])]-CH_V[Math.abs(b[m[0]])]/10+1000:0)+(m[2]?800:0)]).sort((x,y)=>y[1]-x[1]).map(x=>x[0])}
 function chQ(s,al,be,pl){
   if((++CH_N&511)===0&&Date.now()>CH_DL)CH_AB=true;if(CH_AB)return 0;
@@ -1877,7 +1877,7 @@ function chQ(s,al,be,pl){
 function chSrch(s,d,al,be,pl){
   if((++CH_N&511)===0&&Date.now()>CH_DL)CH_AB=true;if(CH_AB)return 0;
   const inC=chAtt(s.b,chKing(s.b,s.t),-s.t);if(inC)d++;
-  if(d<=0)return chQ(s,al,be,pl);
+  if(d<=0)return CH_NOQ?chEval(s):chQ(s,al,be,pl);
   let any=false;
   for(const m of chOrder(s,chGen(s,false))){const n=chMake(s,m);if(chAtt(n.b,chKing(n.b,s.t),-s.t))continue;any=true;const v=-chSrch(n,d-1,-be,-al,pl+1);if(CH_AB)return 0;if(v>=be)return v;if(v>al)al=v}
   if(!any)return inC?-30000+pl:0;
@@ -1886,13 +1886,20 @@ function chSrch(s,d,al,be,pl){
 function chBot(s,D){
   const ms=chLegal(s);if(!ms.length)return null;
   if(Math.random()<D.rnd)return ms[Math.floor(Math.random()*ms.length)];
-  CH_DL=Date.now()+D.ms;CH_AB=false;CH_N=0;let best=ms[0],ord=chOrder(s,ms);
+  CH_DL=Date.now()+D.ms;CH_AB=false;CH_N=0;CH_NOQ=!!D.noq;
+  if(D.nz){
+    // слабые уровни: считаем каждый ход неглубоко и портим оценку случайным шумом (бот ошибается)
+    let best=ms[0],bv=-1e9;
+    for(const m of ms){const v=-chSrch(chMake(s,m),D.d-1,-1e9,1e9,1)+Math.random()*D.nz;if(v>bv){bv=v;best=m}}
+    CH_NOQ=false;return best;
+  }
+  let best=ms[0],ord=chOrder(s,ms);
   for(let d=1;d<=D.d;d++){
     let bm=null,al=-1e9;
     for(const m of ord){const v=-chSrch(chMake(s,m),d-1,-1e9,-al,1);if(CH_AB)break;if(v>al){al=v;bm=m}}
     if(CH_AB||!bm)break;best=bm;ord=[bm].concat(ord.filter(x=>x!==bm));if(al>29000)break;
   }
-  return best;
+  CH_NOQ=false;return best;
 }
 const CH={bet:100,diff:1,st:'idle',s:null,sel:-1,lg:[],last:null,lm:null,lb:null,pend:null,talk:'',lastTalk:'',res:null,busy:false,msg:''};
 const CHESS_ART=`<svg viewBox="0 0 300 375" preserveAspectRatio="xMidYMid slice"><defs><pattern id="chp" width="75" height="75" patternUnits="userSpaceOnUse"><rect width="75" height="75" fill="#f0d9b5"/><rect width="37.5" height="37.5" fill="#b58863"/><rect x="37.5" y="37.5" width="37.5" height="37.5" fill="#b58863"/></pattern></defs><rect width="300" height="375" fill="url(#chp)"/><rect width="300" height="375" fill="#10052a" opacity=".45"/><text x="150" y="250" font-size="190" text-anchor="middle" fill="#fff" stroke="#111" stroke-width="5">♞\uFE0E</text></svg>`;
@@ -1974,29 +1981,31 @@ const CH_SQ=i=>'abcdefgh'[i&7]+(8-(i>>3));
 function chArrow(m,col){
   if(!m)return '';
   const x0=(m[0]&7)+.5,y0=(m[0]>>3)+.5,x1=(m[1]&7)+.5,y1=(m[1]>>3)+.5,dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,nx=-uy,ny=ux;
-  const sx=x0+ux*.3,sy=y0+uy*.3,bx=x1-ux*.62,by=y1-uy*.62,tx=x1-ux*.1,ty=y1-uy*.1;
-  const f=n=>n.toFixed(3),head=`${f(tx)},${f(ty)} ${f(bx+nx*.3)},${f(by+ny*.3)} ${f(bx-nx*.3)},${f(by-ny*.3)}`;
-  return `<line x1="${f(sx)}" y1="${f(sy)}" x2="${f(bx)}" y2="${f(by)}" stroke="#000" stroke-opacity=".35" stroke-width=".25" stroke-linecap="round"/><polygon points="${head}" fill="#000" fill-opacity=".35" stroke="#000" stroke-opacity=".35" stroke-width=".07" stroke-linejoin="round"/><line x1="${f(sx)}" y1="${f(sy)}" x2="${f(bx)}" y2="${f(by)}" stroke="${col}" stroke-width=".17" stroke-linecap="round"/><polygon points="${head}" fill="${col}"/>`;
+  const hl=Math.min(.3,L*.3),hw=.17,sx=x0+ux*.3,sy=y0+uy*.3,tx=x1-ux*.14,ty=y1-uy*.14,bx=tx-ux*hl,by=ty-uy*hl;
+  const f=n=>n.toFixed(3),head=`${f(tx)},${f(ty)} ${f(bx+nx*hw)},${f(by+ny*hw)} ${f(bx-nx*hw)},${f(by-ny*hw)}`;
+  return `<line x1="${f(sx)}" y1="${f(sy)}" x2="${f(bx)}" y2="${f(by)}" stroke="#000" stroke-opacity=".3" stroke-width=".15" stroke-linecap="round"/><polygon points="${head}" fill="#000" fill-opacity=".3" stroke="#000" stroke-opacity=".3" stroke-width=".05" stroke-linejoin="round"/><line x1="${f(sx)}" y1="${f(sy)}" x2="${f(bx)}" y2="${f(by)}" stroke="${col}" stroke-opacity=".9" stroke-width=".09" stroke-linecap="round"/><polygon points="${head}" fill="${col}" fill-opacity=".9"/>`;
 }
 function chPiece(p,pop){const k=(p>0?'w':'k')+Math.abs(p);return CH_SVG[k].replace('class="pc','class="pc'+(pop?' pop':''))}
 function chBoardHTML(){
-  const s=CH.s,ck=chAtt(s.b,chKing(s.b,s.t),-s.t)?chKing(s.b,s.t):-1;let h='';
-  const inM=i=>CH.lm&&(CH.lm[0]===i||CH.lm[1]===i),inB=i=>CH.lb&&(CH.lb[0]===i||CH.lb[1]===i);
+  const s=CH.s,H=CHD[CH.diff].hint,ck=chAtt(s.b,chKing(s.b,s.t),-s.t)?chKing(s.b,s.t):-1;let h='';
+  const inM=i=>CH.lm&&(CH.lm[0]===i||CH.lm[1]===i),inB=i=>H.hl&&CH.lb&&(CH.lb[0]===i||CH.lb[1]===i);
   for(let i=0;i<64;i++){
     const p=s.b[i],r=i>>3,c=i&7,mv=CH.lg.some(m=>m[1]===i);
     const cl=['chs',(r+c)%2?'':'l',inM(i)?'mine':'',inB(i)?'bot':'',CH.sel===i?'sel':'',ck===i?'ck':''].filter(Boolean).join(' ');
     const pop=!!(CH.last&&CH.last[1]===i&&p);
-    h+=`<div class="${cl}" data-i="${i}">${c===0?`<span class="co r">${8-r}</span>`:''}${r===7?`<span class="co f">${'abcdefgh'[c]}</span>`:''}${p?chPiece(p,pop):''}${mv?(p?'<span class="cap"></span>':'<span class="dot"></span>'):''}</div>`;
+    h+=`<div class="${cl}" data-i="${i}">${c===0?`<span class="co r">${8-r}</span>`:''}${r===7?`<span class="co f">${'abcdefgh'[c]}</span>`:''}${p?chPiece(p,pop):''}${mv?(p?(H.cp?'<span class="cap"></span>':''):(H.dt?'<span class="dot"></span>':'')):''}</div>`;
   }
-  return h+`<svg class="charrow" viewBox="0 0 8 8">${chArrow(CH.lb,'#f59e0b')}</svg>`;
+  return h+`<svg class="charrow" viewBox="0 0 8 8">${H.ar?chArrow(CH.lb,'#f59e0b'):''}</svg>`;
 }
 function chStatus(){
   if(CH.st==='over')return 'Партия окончена';
   if(CH.busy)return '🤔 Думает…';
-  return (CH.msg||'Твой ход')+(CH.lb?` · враг: ${CH_SQ(CH.lb[0])}→${CH_SQ(CH.lb[1])}`:' (белые)');
+  const tx=CHD[CH.diff].hint.tx;return (CH.msg||'Твой ход')+(tx&&CH.lb?` · враг: ${CH_SQ(CH.lb[0])}→${CH_SQ(CH.lb[1])}`:(CH.lb?'':' (белые)'));
 }
 function chFoot(){return CH.st==='over'?`<div class="crres ${CH.res.k}">${CH.res.t}</div><button class="ugo" onclick="chAgain()">🔁 ЕЩЁ ПАРТИЮ</button>`:`<button class="go sec" onclick="chResign()">🏳️ Сдаться</button>`}
-function chRender(){
+function chSaveSS(){try{if(CH.st==='play'&&CH.s){sessionStorage.setItem('urodets_chess',JSON.stringify({bet:CH.bet,diff:CH.diff,st:'play',s:CH.s,last:CH.last,lm:CH.lm,lb:CH.lb,msg:CH.msg}))}else sessionStorage.removeItem('urodets_chess')}catch(e){}}
+function chRender(q){
+  chSaveSS();
   const D=CHD[CH.diff];
   if(CH.st==='idle'){
     let h=`<div class="upg"><div class="uhead"><button class="go sec" onclick="chLeave()">← Азарт</button><div class="ubal">🪙 ${Math.floor(S.coins)}</div></div>`;
@@ -2005,6 +2014,7 @@ function chRender(){
     $('box').innerHTML=h;ovShow();return;
   }
   // каркас партии строится один раз, дальше обновляются только доска, статус и низ
+  if(q&&!document.getElementById('chb'))return;
   if(!document.getElementById('chb')){
     $('box').innerHTML=`<div class="upg"><div class="uhead"><button class="go sec" onclick="chLeave()">← Азарт</button><div class="ubal" id="chbal"></div></div><div class="chinfo"><div class="hd">${getSkinHead(D.sk)}</div><div><b>${D.o} · ${D.n}</b><span class="st" id="chst"></span></div></div><div class="chtalk${CH.talk?' on':''}" id="chtalk"><div class="bub">${CH.talk||''}</div></div><div class="chwrap"><div class="chb" id="chb"></div></div><div class="chfoot" id="chfoot"></div></div>`;
     document.getElementById('chb').addEventListener('click',e=>{const c=e.target.closest('.chs');if(c)chTap(+c.dataset.i)});
@@ -2013,12 +2023,12 @@ function chRender(){
   document.getElementById('chst').textContent=chStatus();
   document.getElementById('chfoot').innerHTML=chFoot();
   document.getElementById('chbal').textContent='🪙 '+Math.floor(S.coins);
-  ovShow();
+  if(!q)ovShow();
 }
-window.openChess=()=>{if(CH.st!=='idle'){CH.st='idle'}chRender()};
+window.openChess=()=>{chRender();if(CH.st==='play'&&CH.s.t===-1&&!CH.busy){CH.busy=true;chRender();requestAnimationFrame(()=>setTimeout(chBotMove,150))}};
 window.chDiff=i=>{CH.diff=i;chRender()};window.chAmt=v=>{CH.bet=Math.max(10,Math.floor(v));chRender()};
 window.chAgain=()=>{CH.st='idle';chRender()};
-window.chLeave=()=>{if(CH.st==='play'){CH.st='over';CH.res={k:'l'}}CH.st='idle';CH.busy=false;chTalkClear();openAzart()};
+window.chLeave=()=>{if(CH.st==='play'){CH.st='over';CH.res={k:'l'}}CH.st='idle';CH.busy=false;chTalkClear();chSaveSS();openAzart()};
 window.chResign=()=>{if(CH.st!=='play'||CH.busy)return;CH.st='over';CH.res={k:'l',t:`🏳️ Ты сдался. −${CH.bet} 🪙`};save();chSay(chPick(CH_TALK.resign));chRender()};
 window.chStart=()=>{
   if(CH.bet<10){SFX.err();return toast('Минимальная ставка 10 🪙')}
@@ -2037,8 +2047,19 @@ function chBotMove(){
   if(CH.st!=='play')return;
   const m=chBot(CH.s,CHD[CH.diff]);CH.busy=false;
   if(m){const cap=CH.s.b[m[1]]||(m[3]===1?1:0);CH.s=chMake(CH.s,m);CH.last=m;CH.lb=m;CH.pend=chReactBot(cap,!!m[2]);tone(300,.08,'square',.05)}
-  chEnd();chRender();
+  chEnd();chRender(true);
 }
+
+(function(){
+  try{
+    const j=JSON.parse(sessionStorage.getItem('urodets_chess')||'null');
+    if(j&&j.st==='play'&&j.s&&Array.isArray(j.s.b)&&j.s.b.length===64&&CHD[j.diff]){
+      Object.assign(CH,{bet:j.bet,diff:j.diff,st:'play',s:j.s,sel:-1,lg:[],last:j.last||null,lm:j.lm||null,lb:j.lb||null,msg:j.msg||'',res:null,busy:false});
+      const sg=window.startGame;
+      window.startGame=function(){const r=sg.apply(this,arguments);setTimeout(()=>{if(CH.st==='play')openChess()},60);return r};
+    }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
