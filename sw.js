@@ -1,5 +1,5 @@
 // Service worker: сначала сеть (свежая версия), при отсутствии интернета - кэш.
-const CACHE = 'urodets-v7';
+const CACHE = 'urodets-v8';
 const FILES = [
   './',
   './index.html',
