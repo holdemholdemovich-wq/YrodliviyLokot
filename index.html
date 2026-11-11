@@ -1786,7 +1786,7 @@ function rkBoom(){
 function engSkinFx(){}
 
 // ===== PWA: сохранение, установка, обновления =====
-const APP_V='8';
+const APP_V='9';
 window.exportSave=()=>{
   flush();
   let d='';try{d=localStorage.getItem('elb4')||''}catch(e){}
@@ -1815,24 +1815,43 @@ if('serviceWorker' in navigator){
     }).catch(()=>{});
   });
 }
-let _vc=0;
-async function checkUpdate(){
-  if(Date.now()-_vc<30000)return;_vc=Date.now();
+let _vc=0,_upShown=false;
+function showUpdate(){
+  if(_upShown||$('updov'))return;_upShown=true;
+  const o=document.createElement('div');o.id='updov';
+  o.style.cssText='position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:99999;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:18px;background:linear-gradient(#ffe27a,#ffb800);color:#3a2400;font-weight:900;box-shadow:0 8px 28px #000a,0 0 0 3px #fff8;animation:pp .25s';
+  o.innerHTML='<div style="font-size:26px">🎉</div><div style="flex:1;text-align:left;line-height:1.15"><div style="font-size:15px">Вышло обновление!</div><div id="updt" style="font-size:12px;font-weight:700;opacity:.8">Нажми, чтобы получить новое</div></div><button id="updb" style="padding:10px 14px;border-radius:14px;font-weight:900;font-size:14px;background:#1fd25f;color:#04381a;border:2px solid #0b7a33;box-shadow:0 3px 0 #0b7a33">Обновить</button>';
+  document.body.appendChild(o);
+  try{SFX.buy()}catch(e){}
+  const go=()=>{try{flush()}catch(e){}window.noSave=true;location.reload()};
+  $('updb').onclick=go;
+  let t=15;
+  const iv=setInterval(()=>{
+    const el=$('updt');if(!el){clearInterval(iv);return}
+    if(OVON){el.textContent='Нажми «Обновить», когда закончишь игру';return}
+    t--;el.textContent='Обновимся автоматически через '+t+' с';
+    if(t<=0){clearInterval(iv);go()}
+  },1000);
+}
+async function checkUpdate(force){
+  if(_upShown)return;
+  if(!force&&Date.now()-_vc<8000)return;_vc=Date.now();
   try{
-    const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});
+    // уникальный адрес на каждый запрос: кэш CDN GitHub Pages обходится, версия видна сразу после публикации
+    const r=await fetch('version.json?t='+Date.now()+'&r='+Math.random().toString(36).slice(2),{cache:'no-store'});
     const j=await r.json();
-    if(j&&j.v&&String(j.v)!==APP_V&&!$('updov')){
-      const o=document.createElement('div');o.id='updov';
-      o.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(6,1,16,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffd86b;font-weight:800;text-align:center';
-      o.innerHTML='<div style="width:58px;height:58px;border:6px solid #ffffff33;border-top-color:#ffd86b;border-radius:50%;animation:spin .8s linear infinite"></div><div style="margin-top:20px;font-size:21px">Загрузка обновления…</div><div style="font-size:13px;opacity:.7;margin-top:6px;font-weight:600">Прогресс сохранён</div>';
-      document.body.appendChild(o);flush();
-      setTimeout(()=>{window.noSave=true;location.reload()},1800);
-    }
+    if(!j||!j.v)return;
+    const nv=Number(j.v),cv=Number(APP_V);
+    const newer=(isNaN(nv)||isNaN(cv))?String(j.v)!==APP_V:nv>cv;
+    if(newer)showUpdate();
   }catch(e){}
 }
-setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
-addEventListener('load',()=>setTimeout(checkUpdate,4000));
+setInterval(()=>{if(!document.hidden)checkUpdate()},15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate(true)});
+addEventListener('focus',()=>checkUpdate());
+addEventListener('pageshow',()=>checkUpdate(true));
+addEventListener('online',()=>checkUpdate(true));
+addEventListener('load',()=>setTimeout(()=>checkUpdate(true),1500));
 
 // ===== Шахматы =====
 if((S.upv|0)<2){S.upSh=S.upTo=S.upBd=0;S.upv=2;save()}
