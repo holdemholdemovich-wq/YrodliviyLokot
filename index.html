@@ -394,6 +394,7 @@ html.lo #mhead{animation:none}html.lo .grain,html.lo .emo,html.lo .rkstars.s2{di
 .chdiff button.on{background:linear-gradient(#52d0ff,#1a6fd0);border-color:#0a3a80;box-shadow:0 3px 0 #0a3a80}
 .chmenu .uchips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0}.chmenu .uc{min-width:0;padding:13px 2px;font-size:15px}
 .chmenu .ugo{margin-top:4px;padding:18px;font-size:24px}
+#mver{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:6px 16px;border-radius:999px;background:#ffffff14;border:1.5px solid #ffffff33;color:#ffd86b;font:900 14px/1 system-ui,sans-serif;letter-spacing:1.5px;z-index:2;pointer-events:none;text-shadow:0 1px 0 #0006}
 </style>
 </head>
 <body>
@@ -421,7 +422,7 @@ html.lo #mhead{animation:none}html.lo .grain,html.lo .emo,html.lo .rkstars.s2{di
 <div id="ts"></div>
 <canvas id="fx"></canvas>
 <div id="evo"><div class="evo-t">ЭВОЛЮЦИЯ!</div><div class="evo-n" id="evoN"></div><div class="evo-h">Новый облик открыт</div></div>
-<div id="menu"><div class="mbg"></div><div class="emo"><span style="left:8%;animation-delay:0s">🪙</span><span style="left:22%;animation-delay:3s">🍔</span><span style="left:38%;animation-delay:6s">🚿</span><span style="left:55%;animation-delay:1.5s">😴</span><span style="left:70%;animation-delay:4.5s">🍺</span><span style="left:86%;animation-delay:7.5s">💩</span></div><div class="mwrap"><div id="mhead"></div><h1>МОЙ ГОВОРЯЩИЙ<br><span>УРОДЕЦ</span></h1><p>кликай по локтю · эволюционируй · мойся</p><button class="play" id="mplay" onclick="startGame()">▶ ИГРАТЬ</button><div class="mrow"><button class="go sec" id="mm" onclick="toggleMusic()">🎵 Музыка</button><button class="go sec" id="ms" onclick="toggleSfx()">🔊 Звуки</button></div><div class="mrow" style="margin-top:6px"><button class="go sec" id="mq" onclick="cycleQ()" style="font-size:14px;padding:8px 16px">🖼️ Графика</button><button class="go red" onclick="resetAll(this)" style="font-size:14px;padding:8px 16px">🗑️ Сброс</button></div><div class="mrow" style="margin-top:6px"><button class="go sec" onclick="exportSave()" style="font-size:14px;padding:8px 16px">📤 Экспорт</button><button class="go sec" onclick="importSave()" style="font-size:14px;padding:8px 16px">📥 Импорт</button></div></div></div>
+<div id="menu"><div class="mbg"></div><div class="emo"><span style="left:8%;animation-delay:0s">🪙</span><span style="left:22%;animation-delay:3s">🍔</span><span style="left:38%;animation-delay:6s">🚿</span><span style="left:55%;animation-delay:1.5s">😴</span><span style="left:70%;animation-delay:4.5s">🍺</span><span style="left:86%;animation-delay:7.5s">💩</span></div><div id="mver"></div><div class="mwrap"><div id="mhead"></div><h1>МОЙ ГОВОРЯЩИЙ<br><span>УРОДЕЦ</span></h1><p>кликай по локтю · эволюционируй · мойся</p><button class="play" id="mplay" onclick="startGame()">▶ ИГРАТЬ</button><div class="mrow"><button class="go sec" id="mm" onclick="toggleMusic()">🎵 Музыка</button><button class="go sec" id="ms" onclick="toggleSfx()">🔊 Звуки</button></div><div class="mrow" style="margin-top:6px"><button class="go sec" id="mq" onclick="cycleQ()" style="font-size:14px;padding:8px 16px">🖼️ Графика</button><button class="go red" onclick="resetAll(this)" style="font-size:14px;padding:8px 16px">🗑️ Сброс</button></div><div class="mrow" style="margin-top:6px"><button class="go sec" onclick="exportSave()" style="font-size:14px;padding:8px 16px">📤 Экспорт</button><button class="go sec" onclick="importSave()" style="font-size:14px;padding:8px 16px">📥 Импорт</button></div></div></div>
 
 <script>
 'use strict';
@@ -1786,7 +1787,10 @@ function rkBoom(){
 function engSkinFx(){}
 
 // ===== PWA: сохранение, установка, обновления =====
-const APP_V='9';
+const APP_V='10';
+const VER_BASE=10;
+function verLabel(v){return 'V 1.'+Math.max(0,Number(v)-VER_BASE)}
+try{document.getElementById('mver').textContent=verLabel(APP_V)}catch(e){}
 window.exportSave=()=>{
   flush();
   let d='';try{d=localStorage.getItem('elb4')||''}catch(e){}
@@ -1816,11 +1820,11 @@ if('serviceWorker' in navigator){
   });
 }
 let _vc=0,_upShown=false;
-function showUpdate(){
+function showUpdate(nv){
   if(_upShown||$('updov'))return;_upShown=true;
   const o=document.createElement('div');o.id='updov';
   o.style.cssText='position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:99999;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:18px;background:linear-gradient(#ffe27a,#ffb800);color:#3a2400;font-weight:900;box-shadow:0 8px 28px #000a,0 0 0 3px #fff8;animation:pp .25s';
-  o.innerHTML='<div style="font-size:26px">🎉</div><div style="flex:1;text-align:left;line-height:1.15"><div style="font-size:15px">Вышло обновление!</div><div id="updt" style="font-size:12px;font-weight:700;opacity:.8">Нажми, чтобы получить новое</div></div><button id="updb" style="padding:10px 14px;border-radius:14px;font-weight:900;font-size:14px;background:#1fd25f;color:#04381a;border:2px solid #0b7a33;box-shadow:0 3px 0 #0b7a33">Обновить</button>';
+  o.innerHTML='<div style="font-size:26px">🎉</div><div style="flex:1;text-align:left;line-height:1.15"><div style="font-size:15px">Вышла версия '+verLabel(nv)+'!</div><div id="updt" style="font-size:12px;font-weight:700;opacity:.8">Нажми, чтобы получить новое</div></div><button id="updb" style="padding:10px 14px;border-radius:14px;font-weight:900;font-size:14px;background:#1fd25f;color:#04381a;border:2px solid #0b7a33;box-shadow:0 3px 0 #0b7a33">Обновить</button>';
   document.body.appendChild(o);
   try{SFX.buy()}catch(e){}
   const go=()=>{try{flush()}catch(e){}window.noSave=true;location.reload()};
@@ -1843,7 +1847,7 @@ async function checkUpdate(force){
     if(!j||!j.v)return;
     const nv=Number(j.v),cv=Number(APP_V);
     const newer=(isNaN(nv)||isNaN(cv))?String(j.v)!==APP_V:nv>cv;
-    if(newer)showUpdate();
+    if(newer)showUpdate(j.v);
   }catch(e){}
 }
 setInterval(()=>{if(!document.hidden)checkUpdate()},15000);
